@@ -1,6 +1,10 @@
 rm(list=ls())
 setwd("/home/marc/School/ANOVA/Seminar_2")
 
+## There is quite a bit of fluff in there.
+## Most of this is temporary until a final model, method etc.
+## are 100% decided. Currently, the toy model is socanx.flm1. 
+
 ## SocialAnxiety: Two-way unbalanced design
 library(MASS)
 library(car)
