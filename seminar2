@@ -1,8 +1,755 @@
-#This is the collab tex file
-#Lennert was here
+\documentclass[a4paper,12pt]{article}
+\usepackage[top0.751in, bottom=1in,left=1in,right=1in]{geometry}
+\usepackage[english]{babel}
+\usepackage[utf8x]{inputenc}
+\usepackage{amsmath}
+\usepackage{float}
+\usepackage{dirtytalk}
+\usepackage{mathrsfs}
+\usepackage{booktabs}
+\usepackage[shortlabels]{enumitem}
+\usepackage{enumitem}
+\usepackage{caption}
+\usepackage{textcomp}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
 
-#Thomas test again
-#yo
-#MA present
-#amalesh is heeeereee
 
+%Insert SAS code:
+\usepackage{listings}\usepackage{listings}
+\usepackage{minted}
+\usemintedstyle{borland}
+\lstset{language=SAS, 
+  breaklines=true,  
+  basicstyle=\ttfamily\bfseries,
+  columns=fixed,
+  keepspaces=true,
+  identifierstyle=\color{blue}\ttfamily,
+  keywordstyle=\color{cyan}\ttfamily,
+  stringstyle=\color{purple}\ttfamily,
+  commentstyle=\color{green}\ttfamily,
+  } 
+
+
+\usepackage[nottoc,numbib]{tocbibind}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{verbatim}
+\usepackage[mathscr]{euscript}
+\usepackage{graphicx}
+\usepackage[colorinlistoftodos]{todonotes}
+
+%-------------------------------
+%MACROS
+
+% insert a centered figure with caption and description AND WIDTH
+% parameters 1:filename, 2:title, 3:description and label, 4: textwidth
+% textwidth 1 means as text, 0.5 means half the width of the text
+\newcommand{\figuremacroW}[3]{
+	\begin{figure}[htbp]
+		\centering
+		\includegraphics[width=#2\textwidth]{#1}
+		\caption{#3}
+		\label{#1}
+	\end{figure}
+}
+
+\graphicspath{ 
+   {figures/}
+   }
+
+%-------------------------------
+
+\begin{document}
+
+\begin{titlepage}
+	\centering
+	{\scshape\LARGE  Katholieke Universiteit Leuven (KUL)\par}
+	\vspace{1cm}
+	{\scshape\Large Analysis of Variance (G0S76a)\par}
+	\vspace{1.5cm}
+	{\huge\bfseries Seminar 2\par}
+	\vspace{2cm}
+	{\Large\itshape \textbf{Group 1:}\par}
+	{\Large\itshape Aleksy Leeuwenkamp (r0584309)\par}
+	{\Large\itshape Amalesh Vemula (r0691839)\par}
+	{\Large\itshape Chanukya Patnaik Manipatruni (r0691196)\par}
+	{\Large\itshape Marc-Andr\'e Ch\'enier (r0647679)\par}
+	{\Large\itshape Lennert Ulrichs (r0465758)\par}
+	{\Large\itshape Thomas Duvivier (r0733342)\par}
+	\vfill
+	
+	\par
+	\vspace{0.5cm}
+	Professor:\par
+	\textsc{Alonso Abad Ariel} \par
+	\vfill
+	{\large \today\par}
+\end{titlepage}
+
+\newpage
+\tableofcontents
+\thispagestyle{empty}
+\newpage
+\setcounter{page}{1}
+
+
+\section{Problem}
+
+\subsection{Introduction}
+
+The analysed dataset contains 140 observations with three variables: Group of the individual, Sex and Social Anxiety level. 
+
+\vspace{5mm}
+Researchers want to study the levels of social anxiety across the four different groups: Healthy controls, Social anxiety without depression, Social anxiety with depression and Depression.
+
+\subsection{Exploration of the data}
+
+We first explored the data via graphical exploration. 
+
+\vspace{5mm}
+Considering figures \ref{graph1.png}, \ref{descr02.png} and \ref{descr3.PNG} below, the groups seem to have a different average social anxiety level. Although, the averages of groups “depressed” and “social anxiety with depression” seem to be closer to each other than the other ones. The group “healthy control” has the lowest average level of anxiety while the group "social anxiety with depression" has the highest one. All groups seem to have quite the same variance, except the “social anxiety without depression” one which seems to have a lower variance. The boxplot also indicates one outlier from the group “social anxiety without depression”, although it not an outlier considering the whole dataset.
+
+\figuremacroW{graph1.png}{1}{Box plot of Social Anxiety for each Group}
+
+\figuremacroW{descr02.png}{1}{One dimensional scatter plot of Social Anxiety for each Group with mean (red)}
+
+\figuremacroW{descr3.PNG}{1}{Mean plot of Social Anxiety for each Group with 95\% Confidence Intervals}
+
+Figures \ref{means.PNG} and \ref{std.PNG} provide the means and standard deviations for each group. Just as our previous visual analysis indicated it, the means of each group differ in value, however we cannot yet ascertain whether these differences are significant or not. Just as in the visual analysis, the means of the groups “depressed” and “social anxiety without depression” quite similar while the rest differs. The average social anxiety level of “healthy controls” is, as we stated above, lower than the ones of the other groups. 
+
+\vspace{5mm}
+Concerning the standard deviations, again, as in the visual analysis, the standard deviations of the groups are quite similar except for the group “social anxiety without depression” which has a smaller standard deviation compared with the rest. 
+
+\figuremacroW{means.PNG}{0.8}{Means of each group's social anxiety level}
+
+\figuremacroW{std.PNG}{0.8}{Standard deviations of each group's social anxiety level}
+
+\subsection{Methodology}
+
+\subsubsection{Model}
+
+We used the Cell Mean Model which can be found at equation \ref{cellmean} below.
+
+\begin{gather}\label{cellmean}
+Y_{ij}= µ_i+ \varepsilon_{ij}
+\intertext{Where}
+\begin{aligned}
+&i = 1, 2, 3, 4\\
+&j = 1, … , n_i\\
+\end{aligned}\notag
+\end{gather}
+
+\begin{itemize}[noitemsep]
+    \item $Y_{ij}$ are the observed responses for the $j^{th}$ replicate of the $i^{th}$ level of the factor or the $j^{th}$ subject in the $i^{th}$ treatment
+    \item $\mu_i$ are the mean parameters 
+    \item $\varepsilon_{ij}$ are the random errors assumed to be realizations of N(0, $ \sigma^2 $)
+\end{itemize}
+
+\subsubsection{Assumptions}
+
+\noindent We assume that the $Y_{ij}$ are the sum of the constant term $ \mu_i $ and the random error term $ \varepsilon_{ij} $ which means that:
+
+\begin{itemize}[noitemsep]
+    \item $ E[Y_{ij}] = \mu_i $
+    \item $ V[Y_{ij}] = \sigma^2 $, constant
+    \item $ Y_{ij} $ are normally distributed
+    \item $ Y_{ij} $ are independent realizations from $ N(\mu_i, \sigma^2 $)
+\end{itemize}
+
+\subsubsection{Tests}
+
+\noindent With this model, we test the hypotheses:
+
+  \[
+    \left\{
+                \begin{array}{ll}
+                  H_{0}: \mu_{1}=\mu_{2}=\mu_{3}=\mu_{4}\\
+                  H_{1}: \text{at least one } \mu_{i} \text{ is different}
+                \end{array}
+              \right.
+  \]
+
+Figure \ref{25.PNG} below provides the results of the test above. The p-value being $<2 \cdot 10^{-16}$, the null hypothesis is rejected with significance level 5\%. Therefore, we know that at least one of the groups’ average level of social anxiety is significantly different from the others ones. However, we do not know which one(s).
+
+\figuremacroW{25.PNG}{0.8}{Test's outputs }
+
+To understand which groups are different from each other, we made a Tukey test. Its outputs (see figure \ref{Tukey2.PNG}, page \pageref{Tukey2.PNG}, and figure \ref{TukeyGraph.PNG}, page \pageref{TukeyGraph.PNG}) show us all groups are significantly different from each other, as the p-value for each test is $ < 0.05 $, except groups “social anxiety without depression” and “depressed” for which the test has p-value = 0.976.
+
+\figuremacroW{Tukey2.PNG}{1}{Tukey test outputs}
+\figuremacroW{TukeyGraph.PNG}{1}{Tukey output plotted (groups could not fit the y axis, reference to figure \ref{Tukey2.PNG} to know which intervals correspond to which groups.)}
+
+\subsection{Further tests}
+
+\subsubsection{Model's graphical assumptions test}
+
+In this section, we check the model's appropriateness with regard to. the assumptions on which ANOVA models are built. These are:
+
+\begin{itemize}[noitemsep]
+    \item Normality of the errors (as estimated by the residuals)
+    \item Homoscedasticity of the data 
+    \item Independence of the samples in the dataset
+    \item Not too frequent and/or severe outliers in the data
+\end{itemize}
+
+Since the groups contain unequal sample sizes as can be seen in the mean plot with CI, these assumptions are more important because even small violations can have great effects on the fit and the outcomes of hypothesis tests.
+
+To check those hypotheses, we start off with a simple residual plot (see figure \ref{test1.PNG}, page \pageref{test1.PNG}). We now look for a lack of structure in the residuals and see if the variability remains constant as the index increases. It seems to be the case which bodes well as it means there are no severe problems with regard to the assumptions. However more in-depth graphical analysis followed by formal tests is certainly necessary as even small departures can have big effects in this case. 
+
+\figuremacroW{test1.PNG}{1}{Residuals of the standard cell mean model}
+
+\vspace{5mm}
+A residuals versus fitted values plot (see figure \ref{test2.PNG}, page \pageref{test2.PNG}) strengthens the earlier conclusions, however here we should also check for possible interaction effects between the variable “sex”, “socialanxiety” and “group” because the sex of a person could affect the group in which he or she is more likely to occur and/or affects the average level of social anxiety he or she is more likely to experience. The first interaction effect is most likely controlled by the study design as the researchers have complete control over the composition of the groups, however it is still worthwhile to check this as the design of the study is not mentioned. From figure \ref{test3.PNG}, page \pageref{test3.PNG}, we cannot see any over- or under representation of the sexes in the different groups. Therefore it is safe to assume the interaction effect is controlled for.
+
+\figuremacroW{test2.PNG}{1}{Residuals VS fitted values plot}
+\figuremacroW{test3.PNG}{1}{Residuals VS fitted values plot with sex}
+
+\vspace{5mm}
+Next, we check the residuals versus fitted values plot per factor level (see figure \ref{test4.PNG}, page \pageref{test4.PNG}). This tells us how the residuals are distributed within the levels of the factor. In figure \ref{test4.PNG} we can already see some signs of heteroskedasticity as the boxplots across the factors have wildly different bounds. Also, we see some evidence of non-normality as these boxplots indicate skewed distributions.
+
+\figuremacroW{test4.PNG}{1}{Residuals VS factor level plot}
+
+\vspace{5mm}
+To graphically have a sense of independence within the residuals, we use residuals versus residuals at lag one plot (see figure \ref{test5.PNG}, page \pageref{test5.PNG}). If there is any autocorrelation at lag 1, then this will be shown by a straight line in this plot. As is evident, not a lot of observations lie on a straight line so any autocorrelation at lag 1 seems implausible. 
+
+\figuremacroW{test5.PNG}{1}{Sequence plot}
+
+The final graphical analysis consists of a normal QQ plot of the residuals with a straight line added (see figure \ref{test6.PNG}, page \pageref{test6.PNG}). If the residuals are normally distributed, they will tend to lay on the line as this means that the empirical quantile function and theoretical quantile function are similar. The distribution of the residuals from this plot does not seem to be normal as both more extreme small and large values tend to occur than under normality. 
+ 
+\figuremacroW{test6.PNG}{1}{Normal QQ plot of ressiduals of the cell mean model}
+
+\subsubsection{Model's formal assumptions test}
+
+We will now use formal tests to test these assumptions in a more rigorous manner. For all tests we use significance level $\alpha=0.05$.
+
+\textbf{Independance:}\\
+To test independence we use the Durbin Watson test which tests the autocorrelations of the residuals at lag one. Under the null hypothesis these should be zero with the alternative hypothesis being that they are not equal to zero. We first use this test because if independence is violated one has to resort to time series methods and all the other tests would be useless. R gives the following output:
+
+\vspace{2mm}
+\noindent Lag;	 Autocorrelation;	D-W Statistic;	 p-value:\\
+\noindent 1; -0.0929765;      		2.170589;    	0.5\\
+\noindent Alternative hypothesis: $\rho \neq 0$
+
+\vspace{2mm}
+We cannot reject the null hypothesis at our alpha. Hence, we conclude there are no autocorrelations at lag one and the independence assumption holds.
+
+\vspace{5mm}
+Next, we test for normality of the residuals since earlier graphical analysis already indicated there could be a problem with this. Because our total sample size is relatively large ($n=140$) we have decided to also use the Cramer-Von Mises test next to the Shapiro-Wilks and two-sided Kolmogorov-Smirnov test as it first can act as a tie-breaker in event of a tie between two of the test and second because it has some nice mathematical properties being that a partition of the data is not necessary and it is of size $\alpha$ (or limiting size $\alpha$) whereas the Kolmogorov-Smirnov test requires partition of the data and is only of asymptotic significance level $\alpha$. All tests test the hypothesis: $\text{H}_{0}: \mathscr{F} = \mathscr{F}_{0} \text{ vs. } \text{H}_{1}: \mathscr{F} \neq \mathscr{F}_{0} $ with $\mathscr{F}$ being the empirical cumulative distribution function and $\mathscr{F}_{0}$ being the theoretical normal cumulative distribution function.
+
+\vspace{5mm}
+The results are:
+
+\vspace{2mm}
+\noindent One-sample Kolmogorov-Smirnov test\\
+\noindent D = 0.45927, p-value < 2.2e-16\\
+\noindent Alternative hypothesis: two-sided\\
+\noindent Decision: Reject the null hypothesis and hence conclude that the residuals are not normally distributed.
+
+\vspace{2mm}
+\noindent Shapiro-Wilk normality test\\
+\noindent W = 0.98766, p-value = 0.2473\\
+\noindent Decision: Do not reject the null hypothesis and hence conclude that the residuals are normally distributed.
+
+\vspace{2mm}
+\noindent Cramer-von Mises test of goodness-of-fit
+\noindent Null hypothesis: Normal distribution
+\noindent $\omega2 = 9.686$, p-value < 2.2e-16
+\noindent Decision: Reject the null hypothesis and hence conclude that the residuals are not normally distributed.
+
+\vspace{5mm}
+Conclusion on normality: 
+
+\vspace{2mm}
+Because the normal QQ plot of the residuals and two of the three tests indicate that the residuals are not normally distributed we will conclude that the assumption of normality does not hold. Now, we test for heteroskedasticity of the residuals. We do this using the Levene Test. This test has as null hypothesis that all the group variances are equal and as alternative hypothesis that at least one is different. Figure \ref{test12.PNG}, page \pageref{test12.PNG}, shows R's output.
+
+\figuremacroW{test12.PNG}{0.7}{Levene's Test for Homogeneity of Variance (center = median)}
+
+\vspace{5mm}
+Conclusion on heteroskedasticity: 
+
+\vspace{2mm}
+Levene’s Test rejects the null hypothesis hence at least one of the groups' variances is different and hence we have to reject the homoscedasticity assumption.
+
+\vspace{5mm}
+Lastly, we perform an outlier test to see if there are not any severe and/or frequent outliers which might affect the fit and inference of this model. The outputs can be found in figures \ref{test13.PNG}, \ref{test14.PNG} and \ref{test15.PNG}, in annex page \pageref{test13.PNG}. This test uses the Bonferroni correction and is hence protected against the multiple testing problem. From this test we can conclude that there are not any severe outliers.
+
+Now that we know both the homoscedasticity and normality assumptions are violated we must look for alternative solutions. These often involve transforming the response variable to stabilize the variances and hopefully transform the distribution of the residuals to one which more resembles a normal distribution. We tried two very common transformations: the Box-Cox and the square root transformation. We also tried a nonparametric Kruskal-Wallis test since it does not rely on the assumption of normality of the error terms.
+
+\vspace{5mm}
+Kruskal-Wallis test ranks all the data while ignoring group membership and see whether the ranks in each group differ significantly from the average rank across all groups. In essence, the hypothesis test has a null hypothesis, in which the distribution in each group is the same and the alternative hypothesis, where at least one of the distributions is different.
+ R gives as output: Kruskal-Wallis chi-squared = 89.591, df = 3, p-value < 2.2e-16.
+
+The null hypothesis is rejected and it can be concluded that there is a significant difference in the distributions of the groups. However this test is unable to tell which groups differ.
+
+\subsubsection{Box Cox transformation}
+
+\vspace{5mm}
+Using the boxcox function in R (package= MASS), we can try to find the value of lambda for which the log-likelihood is maximized such that transforming the response into $Y_{ij}^{\lambda}$ hopefully yields a normal distribution of the residuals. After executing the function R returned a lambda value of 0.969697 and figure \ref{test7.PNG} shows the log-likelihood in function of lambda. It must be noted that a lambda value of 0.969697 is very close to 1 and hence will not alter the data much. However this might be just enough. The model we fit now is: $Y_{ij}^{0.969697}= \mu_{i}+ \epsilon_{ij}$ Where i=1,2,3,4 and j=1, … , $n_i$. The resulting ANOVA table for this new model can be found figure \ref{test16.PNG} page \pageref{test16.PNG}. With its values, we reject the null hypothesis that all the group means are the same, just as before.
+
+\figuremacroW{test7.PNG}{1}{Log-likelihood in function of lambda}
+\figuremacroW{test16.PNG}{0.7}{Log-likelihood in function of lambda}
+
+\vspace{5mm}
+Now, we are going to test the assumptions to see if they hold in this new model and whether the Box-Cox transformation could remedy any of the issues encountered before. When graphically visualized, the residuals (see figure \ref{test8.PNG} page \pageref{test8.PNG}) seem to lack any structure and the variance seems to remain approximately constant as the index increases. Next, we look at the QQ plot of the residuals (see figure \ref{test9.PNG}, page \pageref{test9.PNG}. This QQ plot does not seem to be very different from the one in the first model, probably due to the fact that the lambda of the Box-Cox is close to 1 and hence does not change the response values much. From this plot we can see that normally distributed residuals (which estimate the error term) are again not very plausible due to the high occurrence of both low and high extreme values. 
+
+\figuremacroW{test8.PNG}{1}{Residuals of Box-Cox transformation}
+\figuremacroW{test9.PNG}{1}{Normal QQ plot of Box-Cox transform residuals}
+
+\vspace{5mm}
+Hence, just as before we resort to more rigorous formal tests to decide whether the assumptions hold.
+
+\vspace{5mm}
+\noindent Independence:\\
+\noindent lag; 	Autocorrelation; 	D-W ;		Statistic p-value:\\
+\noindent   1;      	-0.0932736;      	2.170647;   	0.444\\
+\noindent Alternative hypothesis: $rho \neq 0$\\
+\noindent Again, we cannot reject the null hypothesis so the assumption of independence seems to hold.
+
+\vspace{5mm}
+\noindent Homoscedasticity (see figure \ref{test17.PNG} page \pageref{test17.PNG}): Now, we can reject the null hypothesis and can conclude that the variance among groups is the same. 
+\figuremacroW{test17.PNG}{0.6}{Levene's Test for Homogeneity of Variance (center = median)}
+
+\vspace{5mm}
+Normality:
+\begin{itemize}
+    \item One-sample Kolmogorov-Smirnov test: D = 0.44855, p-value < 2.2e-16 ; Alternative hypothesis: two-sided ; Decision: the Kolmogorov-Smirnov test again rejects the null hypothesis which leads to the conclusion that the residuals are not normally distributed.
+    \item Shapiro-Wilk normality test: W = 0.98742, p-value = 0.2337; Decision: the Shapiro-Wilks test does not reject the null hypothesis which leads to the conclusion that the residuals are normally distributed.
+    \item Cramer-von Mises test of goodness-of-fit: Null hypothesis - Normal distribution; omega2 = 9.5089, p-value < 2.2e-16; Decision: the Cramer-Von Mises test rejects the null hypothesis which leads to the conclusion that the residuals are not normally distributed.
+\end{itemize}
+
+Conclusion on normality: Because the QQ plot and two of the three tests seem to reject that the residuals which are estimates of the error terms are normally distributed we can conclude that the assumption of normality still does not hold.
+
+\vspace{5mm}
+In conclusion, the Box-Cox transformation seems to not have changed much. However, using the very common square root transformation this problem might be remedied. 
+
+\subsubsection{Square root transformation}
+
+The Box-Cox transformation seems to not have changed much. However, using the square root transformation this problem might be remedied. By taking the square root of the response variable, variances can also be stabilized and normality could also be attained. This changes the model to the following expression: $\sqrt{Y_{ij}}= \mu_{i}+ \epsilon_{ij}$ Where i=1,2,3,4 and j=1, … , $n_i$. After having fitted the model the following ANOVA table is obtained figure \ref{test18.PNG}, page \pageref{test18.PNG}. We reject the null hypothesis that all the group means are the same just as before. 
+
+\figuremacroW{test18.PNG}{0.7}{ANOVA table for square root transformed model}
+
+\vspace{5mm}
+Now, we are going to test the assumptions to see if they hold in this new model and see whether the square root transformation could remedy any of the issues encountered before. The residual plot (see figure \ref{test10.PNG}) seems to lack any structure. However the variability now does not seem to be constant as the index increases. This should be checked with Levene’s Test. Next, we look at the QQ plot of the residuals (figure \ref{test11.PNG}). We can see that the square root transformation might have worked better than the Box-Cox transformation in attaining normality however this should be checked with formal tests.
+
+\figuremacroW{test10.PNG}{1}{Residuals of square root transformation}
+\figuremacroW{test11.PNG}{1}{Normal QQ plot of square root transform residuals}
+
+\vspace{5mm}
+Hence, just as before we resort to more rigorous formal tests to decide whether the assumptions hold.
+
+\begin{itemize}
+    \item \textbf{Independance}:\\
+    lag ;	Autocorrelation ;	D-W Statistic ;	p-value:\\
+    1   ;  	-0.09465715     ; 	2.163938 ;  	0.442\\
+    Again, we cannot reject the null hypothesis so the assumption of independence seems to hold.
+    \item \textbf{Homoscedasticity}: see figure \ref{test19.PNG}. Despite the what the residual plot might have indicated, we have to reject the null hypothesis and cannot conclude that the variance among groups is the same.
+    \item \textbf{Normality}:
+        \begin{itemize}
+            \item One-sample Kolmogorov-Smirnov test: D = 0.085912, p-value = 0.2527; Alternative hypothesis: two-sided; Decision: the Kolmogorov-Smirnov test does not reject the null hypothesis and hence we can conclude that the residuals are normally distributed.
+            \item Shapiro-Wilk normality test: W = 0.97871, p-value = 0.02772; Decision: the Shapiro-Wilk test now rejects the null hypothesis and hence we can conclude that the residuals are not normally distributed.
+            \item Cramer-von Mises test of goodness-of-fit: Null hypothesis: Normal distribution; omega2 = 0.12394, p-value = 0.4802; Decision: The Cramer-Von Mises test does not reject the null hypothesis and hence we can conclude that the residuals are normally distributed. 
+            \item Conclusion on normality: Now, it seems the residuals are normally distributed. We should however still be cautious as the sample size of 140 is not very large and based on the QQ plot it is difficult to say whether the distribution of the residuals is normal.
+        \end{itemize}
+\end{itemize}
+
+\figuremacroW{test19.PNG}{0.7}{Levene's Test for Homogeneity of Variance (center = median)}
+
+\subsubsection{Conclusion}
+After trying out some alternatives it seems that the Box-Cox and square root transformation might help us by remedying some of the problems posed by the first model. Heteroskedasticity is still not remedied. If one is extremely cautious there is still the possibility to just opt for the Kruskal-Wallis test as an alternative, try out different transformations or other types of models.
+
+\newpage
+\section{Additional exercises}
+
+In this section, the additional exercises are solved and the answers are justified. 
+
+\vspace{5mm}
+
+\textbf{Question 1}: If an $F$-statistic for a one-way ANOVA table is significant, then
+
+\begin{enumerate}[a.]
+\item the effect being tested is significant.
+\item the means being tested are not at all equal.
+\item the associated $p$-value is smaller than $\alpha$.
+\item all of the above are true.
+\end{enumerate}
+
+\textbf{Answer}: If an $F$-statistic is significant, the corresponding $p$-value is significant, which means that it is smaller than $\alpha$. The null hypothesis is therefore rejected and hence the means tested are not all equal. This implies that the effect being tested is also significant and hence all of the above are true. So, the correct answer is d.
+
+\vspace{5mm}
+
+\textbf{Question 2}: Which of the following statements is correct based in the following output? 
+
+\vspace{5mm}
+
+ANOVA table for $\text{H}_{0} : \mu_{1} = . . . = \mu_{r}$
+
+\begin{center}
+\centering
+\scalebox{1}{
+\begin{tabular}{ l r r r r r}
+\hline
+  & Df & Sum Sq & Mean Sq & F Value & Pr(>F)          \\ \hline
+Model    & 1 & 0.0625 & 0.06250 & 0.00 & 0.9578 \\ 
+Error & 14 & 302.0675 & 21.57625 & & \\
+Total & 15 & 302.1300 &  & & \\ \hline
+
+\end{tabular}}
+\end{center}
+
+Levene tests: $\text{H}_{0} : \sigma_{1}^{2} = ... = \sigma_{r}^{2}$ versus $\text{H}_{A}: \sigma_{i}^{2} \neq \sigma{j}^{2}$
+
+\begin{center}
+\centering
+\scalebox{1}{
+\begin{tabular}{ l r r r r r}
+\hline
+  & Df & Sum Sq & Mean Sq & F Value & Pr(>F)          \\ \hline
+groups    & 1 & 8.3377 & 8.3377 & 0.00690 & 0.9650 \\ 
+Residuals & 14 & 16928.6 & 1209.2 & & \\ \hline
+
+\end{tabular}}
+\end{center}
+
+\begin{enumerate}[a.]
+
+\item Levene's test is only $0.0069$; therefore, the $F$-test is invalid.
+\item Levene's test is ok and the $F$ is 0.00 (less than $\alpha$); therefore we conclude that the means are not all the same.
+\item we can assume that the variances are equal and it appears that the means are also equal.
+\item neither the variances nor the means are equal since both $p$-values are large.
+\item the variances are more likely equal since Levene’s test $p$-value is larger than $F$ $p$-value.
+\end{enumerate}
+
+\textbf{Answer}: The $p$-values for both tests are 0.9578 and 0.9650. Since they are both larger than $\alpha$, we do not reject the two null hypotheses. This means that we can assume that the variances are equal and that the means are equal. Therefore, the correct answer is c.
+
+\vspace{5mm}
+
+Consider the following ANOVA output table for the next four items.
+
+
+\begin{center}
+\centering
+\scalebox{1}{
+\begin{tabular}{ l r r r r r}
+\hline
+  & Df & Sum Sq & Mean Sq & F Value & Pr(>F)          \\ \hline
+Model    & 3 & ? & ? & ? & ? \\ 
+Error & ? & 9.205 & ? & & \\
+Total & 23 & 51.380 &  & & \\ \hline
+
+\end{tabular}}
+\end{center}
+
+\textbf{Question 3}: In the above table, how many treatments or groups $k$ are there?
+
+\begin{enumerate}[a.]
+\item 3
+\item 4
+\item 1
+\item 2
+\end{enumerate}
+
+\textbf{Answer}: The degrees of freedom (Df) for the model is equal to the number of treatments or groups $k$ minus 1. In this case, the degrees of freedom is equal to 3 = $k$ - 1, so $k = 4$. The correct answer is b.
+
+\vspace{5mm}
+
+\textbf{Question 4}: In the above table, what is $N$, where $N = n_{1} + . . . + n_{k}$?
+
+\begin{enumerate}[a.]
+\item 13
+\item 20
+\item 23
+\item 24
+\item none of the above
+\end{enumerate}
+
+\textbf{Answer}: In the ANOVA table, the total degrees of freedom is equal to $N$ - 1. In our case, we have that the total degrees of freedom is equal to 23. So, $N$ = 24. The correct answer is d.
+
+\vspace{5mm}
+
+\textbf{Question 5}: In the above table, what is the $F$-value?
+
+\begin{enumerate}[a.]
+\item 30.545
+\item 42.175
+\item 14.058
+\item 0.46025
+\item none of the above
+\end{enumerate}
+
+\textbf{Answer}: The $F$-value in the ANOVA table can be calculated in the following way:
+
+\[F-\text{value} = \frac{MSR}{MSE} = \frac{SSR/(k-1)}{SSE/(N-k)} = \frac{(SST-SSE)/(k-1)}{SSE/(N-k)} = \frac{(51.380-9.205)/3}{9.205/20} = 30.545 \]
+
+So, the correct answer is a.
+
+\vspace{5mm}
+
+\textbf{Question 6}: If for the previous table $\alpha = 0.05$ and we were to test the hypothesis
+
+\[ \text{H}_{0} : \mu_{1} = ... = \mu_{r} \text{ versus } \text{H}_{1} : \text{ at least two means differ,}\]
+
+then we would have to look in a table to find $F_{\alpha,df_{1},df_{2}}$ and compare the $F$-value with it. What would $df_{1}$ and $df_{2}$ be for this problem?
+
+\begin{enumerate}[a.]
+\item $df_{1} = 3$ and $df_{2} = 21$
+\item $df_{1} = 3$ and $df_{2} = 20$
+\item $df_{1} = 4$ and $df_{2} = 21$
+\item $df_{1} = 4$ and $df_{2} = 20$
+\item none of the above
+\end{enumerate}
+
+\textbf{Answer}: The $F$-statistic comes from an $F$-distribution with the model’s degrees of freedom in the numerator and the error's degrees of freedom in the denominator. The model's degree of freedom is $k - 1 = 3$ and the error's degrees of freedom is $N - k = 20$ Therefore, the correct answer is b.
+
+\vspace{5mm}
+
+\textbf{Question 7}: A manager carried out a study to evaluate the impact of three training systems on productivity (measured as the number of items produced per hour) in a company producing computer components. The data were analysed with a one-way analysis of
+variance model and the following plot displays the standardized residuals for each of the three training groups.
+
+\figuremacroW{ResVsFit.jpg}{0.6}{Residual plot}
+
+From the previous residual plot, we can see that
+
+\begin{enumerate}[a.]
+\item the normality assumption seems to be violated.
+\item the homogeneity of variance assumption seems to be violated.
+\item the independence assumption seems to be violated.
+\item of the assumption(s) this plot is used to detect, none seem to be violated.
+\item none of the above
+\end{enumerate}
+
+\textbf{Answer}: The residuals should follow a symmetric distribution around 0, and should have the same variance for each group. However, from the plot we can see that the residuals have a lower variance for the first group than for the second and third group. Therefore the homogeneity of the variance assumption seems to be violated. So, the correct answer is b.
+
+\vspace{5mm}
+
+\textbf{Question 8}: Which of the following are true?
+
+\begin{enumerate}[a.]
+\item the $F$-statistics can never take a negative value.
+\item a one-way ANOVA $F$-test tests whether the means are equal or not.
+\item the $F$-statistics always compares variability like given by the sum of squares.
+\item all of the above are true.
+\end{enumerate}
+
+\textbf{Answer}: $F$-statistics are defined as quotients of sums of squares up to a positive constant and can therefore never take a negative value. They always compare variability like given by the sum of squares. In a one-way ANOVA $F$-test, we use the statistic to test the equality of means. Therefore, all of the above are true. The correct answer is d.
+
+\vspace{5mm}
+
+\textbf{Question 9}: We used an ANOVA model to compare the performance of three treatments. The sample sizes per treatment were 523, 125 and 127 respectively. When evaluating the assumptions of the model a Q-Q plot graph gives evidence of certain lack of normality. Further we want to check the homoscedasticity assumption as well. Which of the following statements is true?
+
+\begin{enumerate}[a.]
+\item the normality assumption was violated so we should not check homoscedasticity because one assumption was already violated.
+\item our sample sizes are large enough so our model is robust against departures from the homoscedasticity assumption and we do not need to test for that.
+\item we should check homoscedasticity using the Levene test.
+\end{enumerate}
+
+\textbf{Answer}: Homoscedasticity should be checked using the Levene test. Common statistical procedures assume that variances of the populations from which different samples are drawn are equal. Levene’s test assesses this assumption. The correct answer is c.
+
+\vspace{5mm}
+
+\textbf{Question 10}: A researcher wants to study people’s intentions to get a flu-vaccine shot in an area threatened by an epidemic. To that end 90 persons were classified into three groups
+according to their risk of getting sick and were asked to quantify their likelihood of getting the flu-vaccine shot on a probability scale ranging from 0 to 1. All persons were together in the same room when they were asked about their likelihood of getting the shots. Therefore, it is possible that some persons overheard the answers of nearby respondents. The researcher wishes to test whether the means of the likelihood of getting the shots are the same for the three risk groups. Are the ANOVA model assumptions likely to hold in the present situation? Justify your answer.
+
+\textbf{Answer}: Since it is possible that some persons overheard the answers of nearby respondents, it could be possible that responses are no longer independent of each other. This violates the assumptions of the ANOVA model. The error terms could now be dependent and further inferences may be compromised.
+
+\vspace{5mm}
+
+\textbf{Question 11}: A study was designed to investigate the efficacy of four different treatments, A, B, C and D, conceived to control the main symptoms of schizophrenia. In total 400 patients were randomly assigned to each of the treatments, each group receiving the same number of patients. After 8 weeks of treatment the status of the patients was evaluated using the Positive and Negative Syndrome Scale (PANSS).
+
+\begin{enumerate}[a.]
+\item write down the model you would use to analyse these data.
+\item write down the hypothesis of interest for this problem.
+\item write down the assumptions of your model and discuss their plausibility in this example.
+\end{enumerate}
+
+\textbf{Answer}: The model that would be used to analyse these data is the following 
+
+\[ Y_{ij} = \mu_{i} + \varepsilon_{ij} \text{ with } i = 1, 2, 3, 4 \text{ and } j = 1,..., 100\]
+
+Treatments A, B, C and D are represented by respectively $1, 2, 3$ and $4$. Since there are a total of 400 patients and each of the four groups receives the same number of patients, every group contains 100 patients. $Y_{ij}$ is the evaluation score in PANSS for the $j$th observation in the $i$th group. $\mu_{i}$ is the mean of the $i$th group and the $\varepsilon_{ij}$ are the random errors assumed to be independent realizations of $\mathcal{N}(0,\sigma^{2})$.
+
+\vspace{5mm}
+
+The hypothesis of interest for this problem is the following:
+
+\[\text{H}_{0} : \mu_{1} = \mu_{2} = \mu_{3} = \mu_{4} \text{ versus } \text{H}_{A} : \text{not all } \mu_{i}\text{'s} \text{ are equal.}\]
+
+\vspace{5mm}
+
+The assumptions of this model are the following. First, the responses should follow a normal distribution. $Y_{ij}$ can only take discrete values, since PANSS is a discrete scale. However, we have 400 patients, so the sample size is large enough. Secondly, responses should be independent. We expect that the different patients will not influence each other's responses. Finally, we assume homoscedasticity. Since every group contains the same number of patients, we have a balanced design. Typically, the effect of heteroscedasticity is not that bad in a balanced design.
+
+\vspace{5mm}
+
+\textbf{Question 12}: In the previous study, after collecting the data, the investigators observe that the biggest difference appears to be between treatments D and B. They want to know if this difference is statistically significant. What should they do in this case?
+
+\begin{enumerate}[a.]
+\item they should apply a $t$-test to compare both groups and use 5\% as the level of significance.
+\item this is an effect suggested by the data and they should never use a test to confirm it.
+\item they should apply first an ANOVA $F$-test to compare the four groups and if this test is significant they should apply a 5\% significant $t$-test to compare D and B.
+\item they should apply a Bonferroni procedure to account for multiple comparisons with $k = 2$.
+\item they should apply Tukey procedure to compare the treatments.
+\end{enumerate}
+
+\textbf{Hint}: Take into account that the hypothesis and its test should not be based on data inspection. So if you would like to test the difference between D and B, it should be part of explorative tests on all pairwise differences and you should somehow correct for
+multiple testing.
+
+\textbf{Answer}: Tukey procedure must be applied to compare the treatments. Doing otherwise would be data snooping. Testing the equality of the two means with the biggest difference is similar to implicitly testing all mean differences to find significance. This will increase the type 1 error rate. 
+
+\vspace{5mm}
+
+To solve this, one can apply a Tukey procedure, in order to take into account, explicitly this time, all the needed partial tests. The Tukey procedure can be applied when the family of interest is the set of all pairwise comparisons of factor levels means. So, the correct answer is e.
+
+\newpage\phantom{blabla}
+\section{Appendix}\label{App}
+  \subsection{R-code}
+  \begin{tiny}
+    \begin{minted}{R}
+
+socanx.dat <-  read.table("SocialAnxiety.csv", header = TRUE, sep = ",")
+
+boxplot(socanx.dat$socialanxiety ~ socanx.dat$group, xlab = "Group",
+        ylab = "Social Anxiety",
+        horizontal = F, col = "gray")
+
+library("gplots")
+plotmeans(socialanxiety ~ group, xlab = "Group",
+          ylab = "Social Anxiety",
+          main = "Mean Plot with 95% CI", data = socanx.dat)
+
+stripchart(socanx.dat$socialanxiety ~ socanx.dat$group, vertical = F,
+           xlab = "Social Anxiety", ylab = "Group")
+meanvec  <-  tapply(socanx.dat$socialanxiety, socanx.dat$group, mean)
+abline(h = 1:4, lty = 2, col = "black")
+points(meanvec, 1:4, pch = 17, col = "red", cex = 2)
+
+group_means <- tapply(socanx.dat$socialanxiety, socanx.dat$group, mean)
+group_means
+
+group_sd <- tapply(socanx.dat$socialanxiety, socanx.dat$group, sd)
+group_sd
+
+socanx.dat$group = as.factor(socanx.dat$group)
+socanx.fit1<-aov(socialanxiety~group,data = socanx.dat)
+socanx.fit1.summary<-summary(socanx.fit1)
+summary(socanx.fit1)
+
+install.packages("multcomp")
+library(multcomp)
+tukey = glht(data.fit1, linfct = mcp(group= "Tukey"))
+tukey_ci = confint(tukey)
+tukey_ci
+
+library(stats)
+tukey.t<-TukeyHSD(data.fit1)
+plot(tukey.t)
+tukey.t
+
+plot(socanx.fit1$residuals, main="Residuals of the standard cell mean model", ylab="Resiudals")
+abline(h=0, col="red")
+plot(fitted.values(socanx.fit1),rstandard(socanx.fit1), xlab="Fitted values",ylab="Studentized residuals",main="Residuals vs fitted values plot")
+abline(h=0,lty="dashed")
+plot(socanx.dat$group,rstandard(socanx.fit1), xlab="Observed values",ylab="Studentized residuals",main="Residuals vs factor levels plot")
+abline(h=0,lty="dashed")
+plot(rstandard(socanx.fit1)[-c(1)],rstandard(socanx.fit1)[-c(dim(socanx.dat)[1])],
+     xlab="Studentized residuals at 1 lag",
+     ylab="Studentized residuals",
+     main="Sequence plot")
+abline(a=0,b=1,lty="dashed")
+#check formally whether residuals are serially uncorrelated
+durbinWatsonTest(socanx.fit1)
+#Durbin Watson cannot reject that all the autocorrelation is zero
+## Studentized residuals check for interaction effects
+socanx.dat$rs<-rstandard(socanx.fit1)
+socanx.dat$fit<-fitted.values(socanx.fit1)
+socanx.dat$Colour="black"
+socanx.dat$Colour[socanx.dat$sex=="female"]="red"
+socanx.dat$Colour[socanx.dat$sex=="male"]="blue"
+plot(socanx.dat$fit,socanx.dat$rs, col=socanx.dat$Colour,
+     pch=16, xlab="Fitted values",
+     ylab="Studentized residuals",
+     main="Residuals vs fitted values plot per sex")
+abline(h=0,lty="dashed")
+legend(80,2.2,pch=c(19,19),lty=c(1,1),
+       col=c("red","blue"),legend=c("Female","Male"))
+#normality test of residuals
+qqnorm(socanx.fit1$residuals, main="Normal QQ plot of residuals of the cell mean model")
+qqline(socanx.fit1$residuals)
+ks.test(socanx.fit1$residuals,pnorm,alternative = "two.sided")
+shapiro.test(socanx.fit1$residuals)
+
+#heteroskedasticity test
+library(car)
+leveneTest(socialanxiety~group, data=socanx.dat)
+
+#outlier test
+n_T=140
+pvalue_outliers = NULL
+r <- length(levels(socanx.dat$group))
+for(i in 1:n_T)
+  pvalue_outliers[i]=1-pt(abs(rstudent(socanx.fit1)[i]),
+                          +
+                            n_T-r-1)
+
+Stud.Deleted.Res=rstudent(socanx.fit1)
+Outlier.p.value=pvalue_outliers
+out.data<-data.frame(Stud.Deleted.Res,Outlier.p.value)
+out.data
+
+#alternative kruskal wallis test
+kruskal.test(socialanxiety~group, data=socanx.dat)
+
+#alternative box cox
+library(MASS)
+socanx.boxcox<-boxcox(socanx.fit1,lambda=seq(0,4,by=.1))
+lambda.max<-max(socanx.boxcox$y)
+socanx.boxcox$x[socanx.boxcox$y==lambda.max]
+lambda=0.969697
+socanx.dat$box= socanx.dat$socialanxiety^lambda
+socanx2= aov(socanx.dat$box~socanx.dat$group)
+summary(socanx2)
+plot(socanx2$residuals, main="Residuals of Box-Cox transformation", ylab="residuals")
+abline(h=0,col="red")
+
+#serial correlation
+durbinWatsonTest(socanx2)
+
+#test for heteroskedasticity again
+leveneTest(box~group,data=socanx.dat)
+
+#normality
+qqnorm(socanx2$residuals, main="Normal QQ plot of Box-Cox transform residuals")
+qqline(socanx2$residuals)
+ks.test(socanx2$residuals,pnorm,alternative = "two.sided")
+shapiro.test(socanx2$residuals)
+
+#sqrt transform
+socanx.dat$sq= sqrt(socanx.dat$socialanxiety)
+socanx3=aov(socanx.dat$sq~socanx.dat$group)
+summary(socanx3)
+plot(socanx3$residuals,main="Residuals of square root transformation",ylab="residuals")
+abline(h=0,col="red")
+durbinWatsonTest(socanx3)
+leveneTest(sq~group, data=socanx.dat)
+qqnorm(socanx3$residuals,main="Normal QQ plot of square root transform residuals")
+qqline(socanx3$residuals)
+ks.test(socanx3$residuals,pnorm,alternative = "two.sided")
+shapiro.test(socanx3$residuals)
+
+#trying out other normality tests
+install.packages("goftest")
+library(goftest)
+cvm.test(socanx.fit1$residuals,pnorm)
+cvm.test(socanx2$residuals,pnorm)
+cvm.test(socanx3$residuals,pnorm)
+
+    \end{minted}
+  \end{tiny}
+ \newline
+ \subsection{Outlier test's results}
+\figuremacroW{test13.PNG}{0.2}{Outlier test's results (1/3)}
+\figuremacroW{test14.PNG}{0.2}{Outlier test's results (2/3)}
+\figuremacroW{test15.PNG}{0.2}{Outlier test's results (3/3)}
+
+
+\bibliographystyle{apalike} % or try abbrvnat or unsrtnat
+\bibliography{references} % refers to example.bib
+\end{document}
