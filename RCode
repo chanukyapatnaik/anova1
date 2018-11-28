@@ -1,1 +1,27 @@
-#hi
+setwd("C:/Users/duviv/Documents/University/KUL/S1/G0S76A - Analysis of variance/Project/Seminar2")
+df <-  read.table("SocialAnxiety.csv", header = TRUE, sep = ",")
+
+#descriptive analysis
+summary(df)
+df <- df[-58,] #remove non binary individual
+df$sex <- droplevels(df$sex)
+
+boxplot(df$socialanxiety ~ df$group, xlab = "Group",
+        ylab = "Social Anxiety",
+        horizontal = F, col = "gray")
+
+boxplot(df$socialanxiety ~ df$sex, xlab = "Group",
+        ylab = "Social Anxiety",
+        horizontal = F, col = "gray")
+
+#get each group's mean and sd
+group_means <- tapply(df$socialanxiety, df$group, mean)
+group_means
+group_sd <- tapply(df$socialanxiety, df$group, sd)
+group_sd
+sex_means <- tapply(df$socialanxiety, df$sex, mean)
+sex_means
+sex_sd <- tapply(df$socialanxiety, df$sex, sd)
+sex_sd
+
+interaction.plot(df$group,df$sex,df$socialanxiety)
