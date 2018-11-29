@@ -184,8 +184,6 @@ ks.test(residuals(socanx.faov1), "pnorm", alternative="two.sided")
 ## probably stay on the safe side.
 
 ## Remedial measures
-## Wghted-least squares not appropriate as it assumes normality of the
-## residuals.
 
 ## Check proportionality of variances, sd and means
 socanx.dat$resids <- residuals(socanx.faov1)
