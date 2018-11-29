@@ -5,6 +5,7 @@ setwd("/home/marc/School/ANOVA/Seminar_2")
 library(MASS)
 library(car)
 library(multcomp)
+library(sandwich)
 
 socanx.dat <- read.csv("SocialAnxiety.csv")
 
@@ -25,10 +26,8 @@ socanx.dat <- socanx.dat[complete.cases(socanx.dat), ]
 str(socanx.dat)
 rownames(socanx.dat) <- NULL
 
-
 ## Hypothesis testing (by linear hypotheses)
 ## This is just for fun
-
 socanx.lm1 <- lm(socanx ~ -1 + group:sex, data=socanx.dat)
 
 group.cmat <- rbind(c(1, -1, 0, 0, 1, -1, 0, 0),
@@ -184,6 +183,8 @@ ks.test(residuals(socanx.faov1), "pnorm", alternative="two.sided")
 ## probably stay on the safe side.
 
 ## Remedial measures
+## Wghted-least squares not appropriate as it assumes normality of the
+## residuals.
 
 ## Check proportionality of variances, sd and means
 socanx.dat$resids <- residuals(socanx.faov1)
@@ -195,7 +196,53 @@ cor(means, sds); cor(means, vars)
 cor(means^2, sds)
 ## Can't find evidence of proportionality between the variances of the
 ## residuals and the treatment mean. There isn't an obvious
-## transformation of Y in this case. 
+## transformation of Y in this case.
+
+## Additionaly, we know from having worked with the data, that
+## the square-root and boxplot transformation do not permit
+## to make normality and/or homoscedasticity assumptions. 
+
+## Non-normality is not too big a deal, and it does not seem too
+## pronounced. Homoscedascity is worse, especially due to our
+## unbalanced design.
+
+## Kruskal-Wallis: For non-normality, but it does assume equal
+## variances (Kutner et al., p.795). It cannot be applied to
+## a factorial structure. 
+
+
+## Weighted least-square
+tapply(socanx.dat$resids, socanx.dat$treatment, length)
+## Treatment sample sizes are quite small but not extremely so.
+treatment.weight <- tapply(socanx.dat$resids, socanx.dat$treatment,
+                           var)
+treatment.weight <- treatment.weight^(-1)
+
+trt.wght <- data.frame(trt=names(treatment.weight),
+                         wght=treatment.weight)
+
+socanx.dat <- merge(socanx.dat, trt.wght, by.x="treatment",
+                    by.y="trt")
+
+socanx.waov1 <- update(socanx.faov1, weight=wght)
+Anova(socanx.waov1, type=3)
+Anova(socanx.faov1, type=3)
+
+par(mfrow=c(2, 1))
+plot(socanx.dat$treatment, rstandard(socanx.waov1) * sqrt(socanx.dat$wght))
+plot(socanx.dat$treatment, rstandard(socanx.faov1))
+
+
+## Hard to say if it's better. The treatment: males with social
+## anxiety but no depression have a relatively high variance.
+
+
+## Sandwich variance estimators
+
+
+
+
+
 
 
 
