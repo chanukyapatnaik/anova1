@@ -136,8 +136,89 @@ abline(a=0, b=1, lty="dashed")
 
 acf(ts(rstandard(socanx.faov1)))
 
+cor(res2, res1)
+
 ## The ACF and time plots give no indication of time dependency among
-## the residuals.
+## the residuals. Correlation is close to 0. If there were more remove
+## observations (NA), this way of checking for dependency would be an
+## issue.
+
+## We now turn to formal testing on the residuals
+
+## Homoscedasticity
+
+## The Brown-Forsythe test is chosen because it doesn't need equal
+## sample sizes and is robust to non-normality.
+leveneTest(socanx.faov1)
+
+## Rejection of the null hypothesis that the expected deviation values
+## are equal between treatments. It's fair to say that the assumption
+## of homoscedasticity cannot be made.
+
+## Independence: check for residual autocorrelation at lag 1
+durbinWatsonTest(socanx.faov1, alternative="two.sided",
+                 data=socanx.dat)
+## As expected, we don't find time dependency.
+
+## Outlier
+t.df <- socanx.faov1$df.residual
+
+## It's a one tailed test
+t.alpha <- 1-.05/n
+
+abs.studres <- abs(rstudent(socanx.faov1))
+
+## We don't detect any significant outlier.
+## Although the Bonferroni correction might be
+## conservative, obs. 112 wasn't so far from the boundary
+## in the appropriate residual plot.
+sum(pt(abs.studres, t.df) > t.alpha)
+
+## Shapiro and Kolmogorov for normality
+shapiro.test(residuals(socanx.faov1))
+
+## Kolmogorov for normality
+ks.test(residuals(socanx.faov1), "pnorm", alternative="two.sided")
+
+## Shapiro doesn't reject normality, but Kolmogorov does. We should
+## probably stay on the safe side.
+
+## Remedial measures
+## Wghted-least squares not appropriate as it assumes normality of the
+## residuals.
+
+## Check proportionality of variances, sd and means
+socanx.dat$resids <- residuals(socanx.faov1)
+means <- tapply(socanx.dat$socanx, socanx.dat$treatment, mean)
+sds <- tapply(socanx.dat$resids, socanx.dat$treatment, sd)
+vars <- tapply(socanx.dat$resids, socanx.dat$treatment, var)
+
+cor(means, sds); cor(means, vars)
+cor(means^2, sds)
+## Can't find evidence of proportionality between the variances of the
+## residuals and the treatment mean. There isn't an obvious
+## transformation of Y in this case. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
