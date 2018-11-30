@@ -6,6 +6,7 @@ library(MASS)
 library(car)
 library(multcomp)
 library(sandwich)
+library(lmPerm)
 
 socanx.dat <- read.csv("SocialAnxiety.csv")
 
@@ -236,39 +237,57 @@ plot(socanx.dat$treatment, rstandard(socanx.faov1))
 ## Hard to say if it's better. The treatment: males with social
 ## anxiety but no depression have a relatively high variance.
 
+## Permutation test (Type 3 specification)
+socanx.paov1 <- aovp(socanx ~ group*sex, data=socanx.dat,
+                     perm="Prob", seqs=FALSE)
+summary(socanx.paov1)
 
-## Sandwich variance estimators
-
-
-
-
-
-
-
+summary(glht(socanx.paov1))
+summary(glht(socanx.faov1))
 
 
+## Sandwich variance estimator for multiple mean comparison Procedure
+## his warranted for unbalanced, non-normal and heteroskedastic data.
+
+socanx.lm2 <- lm(socanx ~ -1 + treatment, data=socanx.dat)
+coef(socanx.lm2)
+
+rownames(coef(summary(socanx.lm2)))
+
+factorial(4)/4
+
+## Assumes treatment means are of equal importance
+## (does not weight for sample size versus men and women)
+group.contmat <- rbind(c(1/2, 1/2, -1/2, -1/2, 0, 0, 0, 0),
+                       c(-1/2, -1/2, 0, 0, 1/2, 1/2, 0, 0),
+                       c(1/2, 1/2, 0, 0, 0, 0, -1/2, -1/2),
+                       c(0, 0, -1/2, -1/2, 1/2, 1/2, 0, 0),
+                       c(0, 0, -1/2, -1/2, 0, 0, 1/2, 1/2),
+                       c(0, 0, 0, 0, 1/2, 1/2, -1/2, -1/2))
+
+rownames(group.contmat) <- c("nosc_dep - hlt",
+                             "socanx_dep - nosc_dep",
+                             "nosc_dep - socanx_nodep",
+                             "socanx_dep - hlt",
+                             "socanx_nodep - hlt",
+                             "socanx_dep - socanx_nodep")
 
 
+group.contmat %*% coef(socanx.lm2)
+
+## Robust mean comparison with Holm correction
+socanx.robglht <- glht(socanx.lm2, linfct=group.contmat,
+                       vcov=vcovHC)
+
+summary(socanx.robglht, test=adjusted("holm"))
 
 
+## Comparison with a default model with only group as factor
+## without sandwich standard errors and Tukey correction
+socanx.Taov <- aov(socanx ~ -1 + group, data=socanx.dat)
+socanx.lm3 <- lm3(socanx ~ -1 + group, data=socanx.dat)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+TukeyHSD(socanx.Taov)
 
 
 
