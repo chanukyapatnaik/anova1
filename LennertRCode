@@ -1,0 +1,67 @@
+options(repos = c(CRAN = "http://cran.rstudio.com"))
+
+
+## Two-Way ANOVA unbalanced
+
+## SocialAnxiety2 is a csv file with the row with missing value deleted
+
+SocialAnxiety <- SocialAnxiety2
+
+SocialAnxiety$group <- as.factor(SocialAnxiety$group)
+SocialAnxiety$sex <- as.factor(SocialAnxiety$sex)
+attach(SocialAnxiety)
+SocialAnxiety
+
+## Summary tables
+
+freq.unbalanced<-table(SocialAnxiety$sex,SocialAnxiety$group)
+mean.freq.unbalanced<-tapply(SocialAnxiety$socialanxiety,list(SocialAnxiety$sex,SocialAnxiety$group),mean)
+freq.unbalanced
+mean.freq.unbalanced
+
+## Interaction plot
+
+interaction.plot(group,sex,socialanxiety, xlab="Treatment")
+
+## Regression model
+
+socialanxiety.lm.unbalanced=lm(socialanxiety~-1+sex:group, data = SocialAnxiety)
+summary(socialanxiety.lm.unbalanced)
+
+## Important note: The order of the cell means (mu components) is given in the coefficients tables.
+## Pay attention to this order when constructing the contrast matrices in R!!!
+## Male = 1, Female = 2
+## Healthy = 1, Soc without Dep = 2, Soc with Dep = 3, Depressed = 4
+
+## Contrasts for effect of Interaction
+
+cmint.unbalanced <- matrix(c(0,0 , -1,1,0, 0,1,-1,
+                             0,0 , -1,1,1,-1,0,0,
+                             1,-1, -1,1,0,0 ,0,0),
+                             nrow = 3, ncol = 8, byrow =T)
+Int.const.unbalanced <- glht(socialanxiety.lm.unbalanced, linfct = cmint.unbalanced)
+summary(Int.const.unbalanced,test =Ftest())
+
+#There is no significant interaction (p-value is 0.9762)
+
+
+## Contrasts for main effect of Sex (Factor A)
+
+cmsex.unbalanced <- matrix(c(-1,1,-1,1,-1,1,-1,1), 1)
+Sex.const.unbalanced <- glht(socialanxiety.lm.unbalanced, linfct = cmsex.unbalanced)
+summary(Sex.const.unbalanced,test =Ftest())
+
+## Contrasts for main effect of group (Factor B)
+
+cmgroup.unbalanced <- matrix(c(0,0 , 1,1,0, 0,-1,-1,
+                               0,0 , 1,1,-1,-1,0,0,
+                               -1,-1, 1,1,0,0 ,0,0),
+                           nrow = 3, ncol = 8, byrow =T)
+group.const.unbalanced <- glht(socialanxiety.lm.unbalanced, linfct = cmgroup.unbalanced)
+summary(group.const.unbalanced,test=Ftest())
+
+
+# Type III SS in R
+
+socialanxiety.fit3.unbalanced<-aov(socialanxiety~sex*group,data = SocialAnxiety,contrasts=list(sex='contr.sum', group='contr.sum'))
+drop1(socialanxiety.fit3.unbalanced,~.,test="F")
